@@ -12,7 +12,7 @@ public class EchoClient {
     public static void main(String[] args) throws IOException {
 
         if (args.length == 0) {
-            args = new String[]{"localhost", "hello"};
+            args = new String[]{"192.168.1.4", "hello!"};
         }
 
         if (args.length < 2) {
