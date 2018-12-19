@@ -30,6 +30,7 @@ public interface Server<T> extends Closeable {
             protected void execute(BlockingConnectionHandler<T>  handler) {
                 new Thread(handler).start();
             }
+
         };
 
     }
