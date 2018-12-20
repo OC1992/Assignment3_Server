@@ -12,11 +12,12 @@ public class TPCMain {
             args = new String[]{"127.0.0.1"};
         }
 
-
+        /*
         Server.threadPerClient(
               7777, //port
                () -> new RemoteCommandInvocationProtocol<>(feed), //protocol factory
                ObjectEncoderDecoder::new //message encoder decoder factory
        ).serve();
+       */
     }
 }

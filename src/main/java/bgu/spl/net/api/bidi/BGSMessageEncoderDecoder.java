@@ -99,7 +99,7 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
     public String decodeNextByte(byte nextByte) {
         if(opIndex<decOpArr.length){
             decOpArr[opIndex++]=nextByte;
-            if(opIndex==decOpArr.length-1)
+            if(opIndex==decOpArr.length)
                 opcode=bytesToShort(decOpArr);
             if(opcode!=6 & opcode!=3)
                 return null;
@@ -133,27 +133,27 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
     }
 
 
-    private String getFollowFrame(byte nextByte){
-        if(userIndex<3) {
-            if(userIndex==0) {
-                pushByte(nextByte);
-                userIndex++;
-                return null;
-            }
-            else {
-                usArr[userIndex-1]=nextByte;
-                if(userIndex==2)
-                    numOfUsers=bytesToShort(usArr);
-                return null;
-            }
+    private String getFollowFrame(byte nextByte) {
+        if (userIndex == 0) {
+            pushByte(nextByte);
+            userIndex++;
+            return null;
         }
+        if (userIndex == 1 |userIndex==2 ) {
+            usArr[userIndex - 1] = nextByte;
+            if (userIndex == 2)
+                numOfUsers = bytesToShort(usArr);
+            userIndex++;
+            return null;
+        }
+
         if(nextByte=='\0'){
             zeroByteCount++;
             if(zeroByteCount==numOfUsers){
                 String byteResult = new String(bytes, 0, len, StandardCharsets.UTF_8);
                 char follow=byteResult.charAt(0);
                 String result1= byteResult.substring(1);
-                String result=opcodeToString(opcode)+" "+follow+" "+result1;
+                String result=opcodeToString(opcode)+" "+numOfUsers+" "+follow+" "+result1;
                 len=0;
                 zeroByteCount=0;
                 opIndex=0;
