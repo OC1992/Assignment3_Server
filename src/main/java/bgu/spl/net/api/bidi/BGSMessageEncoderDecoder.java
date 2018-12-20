@@ -1,9 +1,9 @@
 package bgu.spl.net.api.bidi;
-
 import bgu.spl.net.api.MessageEncoderDecoder;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
     private byte [] decOpArr=new byte[2];
@@ -18,90 +18,72 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
 
     @Override
     public byte[] encode(String message) {
-        String opcodeString=message.substring(0,message.indexOf('-'));
-        String noFirstOp=message.substring(message.indexOf('-'));
+        String opcodeString=message.substring(0,message.indexOf(' '));
+        String noFirstOp=message.substring(message.indexOf(' ')+1);
         short op=StringToOpcode(opcodeString);
         byte[]first=shortToBytes(op);
+        List<Byte> byteList=new LinkedList<>();
+        addBytesToList(byteList,first);
         switch (op){
-            case 9:
-                String secondOpString=noFirstOp.substring(0,noFirstOp.indexOf('-'));
-                String noSecondOp=noFirstOp.substring(noFirstOp.indexOf('-'));
-                String thirdOpString=noSecondOp.substring(0,noSecondOp.indexOf(' '));
-                String allTheRest=noSecondOp.substring(noSecondOp.indexOf(' '))+'\0';
-                short secondOp=StringToOpcode(secondOpString);
-                byte[]second=shortToBytes(secondOp);
-                short thirdOp=Short.parseShort(thirdOpString);
-                byte[]third=shortToBytes(thirdOp);
-                switch (secondOp){
-                    case 4:
-                    case 7:
-                        byte[]stringByte=allTheRest.getBytes();
-                        byte[]bytesTosend=new byte[6+stringByte.length];
-                        bytesTosend[0]=first[0];
-                        bytesTosend[1]=first[1];
-                        bytesTosend[2]=second[0];
-                        bytesTosend[3]=second[1];
-                        bytesTosend[4]=third[0];
-                        bytesTosend[5]=third[1];
-                        for(int i=6;i<bytesTosend.length;i++)
-                            bytesTosend[i]=stringByte[i-6];
-                        return bytesTosend;
-                    case 8:
-                        String forthOpString=allTheRest.substring(0,allTheRest.indexOf(' '));
-                        String noforthOpString=allTheRest.substring(allTheRest.indexOf(' '));
-                        String fifthOpString=noforthOpString.substring(0,noforthOpString.indexOf(' '));
-                        short forthOp=Short.parseShort(forthOpString);
-                        short fifthOp=Short.parseShort(fifthOpString);
-                        byte[]forth2=shortToBytes(forthOp);
-                        byte[]fifth=shortToBytes(fifthOp);
-                        byte[]bytesTosend2=new byte[10];
-                        bytesTosend2[0]=first[0];
-                        bytesTosend2[1]=first[1];
-                        bytesTosend2[2]=second[0];
-                        bytesTosend2[3]=second[1];
-                        bytesTosend2[4]=third[0];
-                        bytesTosend2[5]=third[1];
-                        bytesTosend2[6]=forth2[0];
-                        bytesTosend2[7]=forth2[1];
-                        bytesTosend2[8]=fifth[1];
-                        bytesTosend2[9]=fifth[1];
-                        return bytesTosend2;
-                }
             case 10:
-                String secondOpString10=noFirstOp.substring(0,noFirstOp.indexOf(' '));
-                String noSecondOp10=noFirstOp.substring(noFirstOp.indexOf(' '));
-                short messageOp=StringToOpcode(secondOpString10);
-                byte[]optional=noSecondOp10.getBytes();
-                byte[] output=new byte[4+optional.length];
-                byte[] messageOpBytes=shortToBytes(messageOp);
-                output[0]=first[0];
-                output[1]=first[1];
-                output[2]=messageOpBytes[0];
-                output[3]=messageOpBytes[1];
-                for(int i=4;i<output.length;i++)
-                    output[i]=optional[i-4];
-                return output;
+                return setAckFrame(byteList,noFirstOp);
+            case 9:
+                return setNotificationFrame(byteList,noFirstOp);
             case 11:
-                String secondOpString11=noFirstOp.substring(0,noFirstOp.indexOf(' '));
-                short messageOp11=StringToOpcode(secondOpString11);
-                byte[] messageOp11Byte=shortToBytes(messageOp11);
-                byte[] output11=new byte[4];
-                output11[0]=first[0];
-                output11[1]=first[1];
-                output11[2]=messageOp11Byte[0];
-                output11[3]=messageOp11Byte[1];
-                return output11;
+                short messageOp=StringToOpcode(noFirstOp);
+                byte[] messageOpByte=shortToBytes(messageOp);
+                addBytesToList(byteList,messageOpByte);
+                return ByteListTobyteArray(byteList);
         }
         return new byte[0];
     }
 
+    private byte[] setAckFrame(List<Byte> byteList,String line){
+        short secondOp=Short.parseShort(line.substring(0,line.indexOf(' ')));
+        byte[]second=shortToBytes(secondOp);
+        addBytesToList(byteList,second);
+        String noSecondOp=line.substring(line.indexOf(' ')+1);
+        short thirdOp=Short.parseShort(noSecondOp.substring(0,noSecondOp.indexOf(' ')));
+        byte[]third=shortToBytes(thirdOp);
+        addBytesToList(byteList,third);
+        String allTheRest=noSecondOp.substring(noSecondOp.indexOf(' ')+1);
+        switch (secondOp){
+            case 4:
+            case 7:
+                byte[]stringByte=(allTheRest.substring(0,allTheRest.length()-1)).getBytes();
+                addBytesToList(byteList,stringByte);
+                byteList.add((byte)'0');
+                return ByteListTobyteArray(byteList);
+            case 8:
+                String[] forthAndFifth = allTheRest.split("\\s+");
+                short forthOp=Short.parseShort(forthAndFifth[0]);
+                short fifthOp=Short.parseShort(forthAndFifth[1]);
+                byte[]forth=shortToBytes(forthOp);
+                byte[]fifth=shortToBytes(fifthOp);
+                addBytesToList(byteList,forth);
+                addBytesToList(byteList,fifth);
+                return ByteListTobyteArray(byteList);
+        }
+        return new byte[0];
+    }
+
+    private byte[] setNotificationFrame(List<Byte> byteList,String line){
+        char notificationType=line.charAt(0);
+        byteList.add((byte)notificationType);
+        String PostingUserAndContent=line.substring(line.indexOf(' ')+1);
+        String PostingUser=PostingUserAndContent.substring(0,PostingUserAndContent.indexOf(' '))+"\0";
+        String Content=PostingUserAndContent.substring(PostingUserAndContent.indexOf(' '))+"\0";
+        addBytesToList(byteList,PostingUser.getBytes());
+        addBytesToList(byteList,Content.getBytes());
+        return ByteListTobyteArray(byteList);
+    }
     @Override
     public String decodeNextByte(byte nextByte) {
         if(opIndex<decOpArr.length){
             decOpArr[opIndex++]=nextByte;
             if(opIndex==decOpArr.length)
                 opcode=bytesToShort(decOpArr);
-            if(opcode!=6 & opcode!=3)
+            if(opcode!=3 & opcode!=7)
                 return null;
         }
         switch (opcode){
@@ -146,14 +128,13 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
             userIndex++;
             return null;
         }
-
         if(nextByte=='\0'){
             zeroByteCount++;
             if(zeroByteCount==numOfUsers){
                 String byteResult = new String(bytes, 0, len, StandardCharsets.UTF_8);
                 char follow=byteResult.charAt(0);
                 String result1= byteResult.substring(1);
-                String result=opcodeToString(opcode)+" "+numOfUsers+" "+follow+" "+result1;
+                String result=opcodeToString(opcode)+" "+follow+" "+numOfUsers+result1;
                 len=0;
                 zeroByteCount=0;
                 opIndex=0;
@@ -168,27 +149,27 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
     private String getLogoutUserListFrame(){
         String result=opcodeToString(opcode);
         len = 0;
+        opcode=0;
         opIndex=0;
         return result;
     }
 
 
     private String getPMLoginRegisterFrame(byte nextByte){
-        if(nextByte=='\0')
+        if(nextByte=='\0'){
             zeroByteCount++;
-        pushByte(nextByte);
-        if(zeroByteCount==2){
-            String byteResult = new String(bytes, 0, len, StandardCharsets.UTF_8);
-            String result=opcodeToString(opcode)+" "+byteResult;
-            len = 0;
-            zeroByteCount=0;
-            opIndex=0;
-            return result;
+            if(zeroByteCount==2) {
+                String byteResult = new String(bytes, 0, len, StandardCharsets.UTF_8);
+                String result = opcodeToString(opcode) + " " + byteResult;
+                len = 0;
+                zeroByteCount = 0;
+                opIndex = 0;
+                return result;
+            }
         }
         else
-            return null;
-
-
+            pushByte(nextByte);
+        return null;
     }
 
 
@@ -268,4 +249,15 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
         return 0;
     }
 
+    private void addBytesToList(List<Byte> byteList,byte[] bytes){
+        for(int i=0;i<bytes.length;i++)
+            byteList.add(bytes[i]);
+    }
+
+    private byte[] ByteListTobyteArray(List<Byte> byteList){
+        byte[] output=new byte[byteList.size()];
+        for (int i=0;i<byteList.size();i++)
+            output[i]=byteList.get(i);
+       return output;
+    }
 }
