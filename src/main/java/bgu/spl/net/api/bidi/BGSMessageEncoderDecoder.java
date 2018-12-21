@@ -50,9 +50,9 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
         switch (secondOp){
             case 4:
             case 7:
-                byte[]stringByte=(allTheRest.substring(0,allTheRest.length()-1)).getBytes();
-                addBytesToList(byteList,stringByte);
-                byteList.add((byte)'0');
+                String[] users = allTheRest.split("\\s+");
+                for(int i=0;i<thirdOp;i++)
+                    addBytesToList(byteList,(users[i]+'\0').getBytes());
                 return ByteListTobyteArray(byteList);
             case 8:
                 String[] forthAndFifth = allTheRest.split("\\s+");
@@ -142,7 +142,8 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
                 return result;
             }
         }
-       pushByte(nextByte);
+        else
+            pushByte(nextByte);
         return null;
     }
 
