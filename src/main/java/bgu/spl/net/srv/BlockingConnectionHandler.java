@@ -27,7 +27,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void run() {
-        BGSMessageEncoderDecoder test=new BGSMessageEncoderDecoder();
         try (Socket sock = this.sock) { //just for automatic closing
             int read;
             in = new BufferedInputStream(sock.getInputStream());
@@ -36,8 +35,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                 T nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
                     System.out.println(nextMessage);
-                    out.write(test.encode("ACK 4 3 tomer ofir tomer 0"));
-                    out.flush();
                     protocol.process(nextMessage);
                 }
             }
