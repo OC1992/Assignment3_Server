@@ -1,7 +1,7 @@
 package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
+
 import bgu.spl.net.api.bidi.BidiMessagingProtocol;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public abstract class BaseServer<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MessagingProtocol<T>> protocolFactory;
+    private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
 /*
@@ -22,7 +22,7 @@ public abstract class BaseServer<T> implements Server<T> {
         this.sock = null;
         */
 
-    public BaseServer(int port, Supplier<MessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
+    public BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encoderDecoderFactory;
@@ -41,7 +41,7 @@ public abstract class BaseServer<T> implements Server<T> {
 
                 Socket clientSock = serverSock.accept();
 //it forces me to use a T type
-                BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<T>(
+                BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
                         (BidiMessagingProtocol<T>) protocolFactory.get());
@@ -64,7 +64,7 @@ public abstract class BaseServer<T> implements Server<T> {
 
     public static <T> BaseServer<T> threadPerClient(
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
+            Supplier<BidiMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
 
         return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
