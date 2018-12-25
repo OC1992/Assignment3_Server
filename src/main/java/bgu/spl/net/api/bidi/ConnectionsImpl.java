@@ -3,17 +3,16 @@ import bgu.spl.net.srv.ConnectionHandler;
 import java.util.HashMap;
 
 public class ConnectionsImpl<T> implements Connections<T>{
-    private int clientCount;
+
     private HashMap<Integer,ConnectionHandler<T>>  connections;
 
     public ConnectionsImpl(){
         this.connections=new HashMap<>();
-        this.clientCount= 0;
     }
 
 
-    public void add(ConnectionHandler<T> handler) {
-        connections.put(clientCount++,handler);
+    public void add(ConnectionHandler<T> handler,int clientCount) {
+        connections.put(clientCount,handler);
     }
     public void remove(int connectionId) {
         connections.remove(connectionId);

@@ -37,9 +37,10 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
     }
 
     private byte[] setAckFrame(List<Byte> byteList,String line){
-        if(line.length()>1){
+        if(line.contains(" ")){
+            String secondOpString=line.substring(0,line.indexOf(' '));
             String noSecondOp = line.substring(line.indexOf(' ') + 1);
-            short secondOp=addReturnShortBytesToList(byteList,line,false);
+            short secondOp=addReturnShortBytesToList(byteList,secondOpString,false);
             String allTheRest=noSecondOp.substring(noSecondOp.indexOf(' ') + 1);
             short thirdOp=addReturnShortBytesToList(byteList,noSecondOp.substring(0, noSecondOp.indexOf(' ')),false);
             switch (secondOp){
@@ -56,7 +57,7 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
                     return ByteListTobyteArray(byteList);
             }
         }
-        addReturnShortBytesToList(byteList,line.substring(0,line.indexOf(' ')),false);
+        addReturnShortBytesToList(byteList,line,false);
         return ByteListTobyteArray(byteList);
     }
 

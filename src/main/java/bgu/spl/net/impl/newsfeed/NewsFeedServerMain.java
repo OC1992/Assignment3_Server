@@ -2,6 +2,7 @@ package bgu.spl.net.impl.newsfeed;
 
 import bgu.spl.net.api.bidi.BGSMessageEncoderDecoder;
 import bgu.spl.net.api.bidi.BidiMessagingProtocolImpl;
+import bgu.spl.net.api.bidi.Database;
 import bgu.spl.net.impl.echo.EchoProtocol;
 import bgu.spl.net.impl.echo.LineMessageEncoderDecoder;
 import bgu.spl.net.impl.rci.ObjectEncoderDecoder;
@@ -12,12 +13,13 @@ public class NewsFeedServerMain {
 
     public static void main(String[] args) {
         NewsFeed feed = new NewsFeed(); //one shared object
+        Database database=new Database();
 
 
 // you can use any server... 
         Server.threadPerClient(
                 7777, //port
-                () -> new BidiMessagingProtocolImpl(), //protocol factory
+                () -> new BidiMessagingProtocolImpl(database), //protocol factory
                 BGSMessageEncoderDecoder::new //message encoder decoder factory
         ).serve();
 /*
