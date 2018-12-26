@@ -3,7 +3,7 @@ import bgu.spl.net.srv.ConnectionHandler;
 import java.util.HashMap;
 
 public class ConnectionsImpl<T> implements Connections<T>{
-    private int clientCount;
+    public int clientCount;
     private HashMap<Integer,ConnectionHandler<T>>  connections;
 
     public ConnectionsImpl(){
