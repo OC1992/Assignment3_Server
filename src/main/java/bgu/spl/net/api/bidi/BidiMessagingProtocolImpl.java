@@ -48,21 +48,23 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 break;
             case 4:
                 if(restOfMessage.charAt(0)=='0')
-                    FollowUnfollow(restOfMessage.substring(message.indexOf(' ')+1),true);
+                    FollowUnfollow(restOfMessage.substring(restOfMessage.indexOf(' ')+1),true);
                 else
-                    FollowUnfollow(restOfMessage.substring(message.indexOf(' ')+1),false);
+                    FollowUnfollow(restOfMessage.substring(restOfMessage.indexOf(' ')+1),false);
                 break;
             case 5:
-                Post(message);
+                Post(restOfMessage);
                 break;
             case 6:
-                PM(message);
+                PM(restOfMessage);
                 break;
             case 7:
                 UserList();
+                break;
 
             case 8:
-                StatMessage(message);
+                StatMessage();
+                break;
         }
     }
 
@@ -106,7 +108,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         else {
             database.addUser(userAndPas[0], userAndPas[1], clientId);
             connections.send(clientId, "ACK 1");
-            this.userName = userAndPas[0];
         }
     }
 
@@ -116,7 +117,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             connections.send(clientId, "ERROR 2");
         else {
             login = true;
+            this.userName = userAndPas[0];
+            database.setConnection(userName,clientId);
             connections.send(clientId, "ACK 2");
+            Vector<String> notSeen=database.getNotSeenMessages(userName);
+            notSeen.forEach(msg->connections.send(clientId,msg));
+            notSeen.clear();
         }
 
     }
@@ -127,6 +133,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         else {
             login = false;
             connections.send(clientId, "ACK 3");
+            database.setLoggedIn(userName,false);
+            database.removeConnection(userName);
             connections.disconnect(clientId);
             terminate=true;
         }
@@ -143,7 +151,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             for (String user : usersToFollowUnfollow) {
                 if (follow && !database.isFollow(userName, user))
                     canFollowUnfollowList.add(user);
-                if (!follow && database.isFollow(userName, userName))
+                if (!follow && database.isFollow(userName, user))
                     canFollowUnfollowList.add(user);
             }
             if (canFollowUnfollowList.size() == 0) {
@@ -153,11 +161,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             StringBuilder stringBuilder=new StringBuilder();
             if (follow) {
                 database.addFollowers(userName, canFollowUnfollowList);
-                stringBuilder.append("ACK 0 ");
+                stringBuilder.append("ACK 4 ");
             }
             else{
                 database.deleteFollowers(userName,canFollowUnfollowList);
-                stringBuilder.append("ACK 1 ");
+                stringBuilder.append("ACK 4 ");
                 }
             stringBuilder.append(canFollowUnfollowList.size());
             appendUsers(canFollowUnfollowList,stringBuilder);
@@ -173,14 +181,23 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
           String toSend= "NOTIFICATION Public "+userName+" "+message ;
           List<String> tagged=new LinkedList<>();
           String[] splitted= message.split("@");
-          for(int i=1;i<splitted.length;i=i+2)
+          for(int i=1;i<splitted.length;i=i+1)
               tagged.add(splitted[i].substring(0,splitted[i].indexOf(" ")));
           Vector<String> followers=database.getFollowers(userName);
           followers.forEach(s->{
               tagged.remove(s);
-              connections.send(database.getUserConnectionId(s),toSend);
+              if(database.isLoggedIn(s))
+                  connections.send(database.getUserConnectionId(s),toSend);
+              else
+                  database.addNotSeenMessage(s,toSend);
           });
-          tagged.forEach(s->connections.send(database.getUserConnectionId(s),toSend));
+          tagged.forEach(s->{
+              if (database.isLoggedIn(s))
+                  connections.send(database.getUserConnectionId(s), toSend);
+              else
+                  database.addNotSeenMessage(s, toSend);
+
+          });
           database.addPost(userName,message);
           connections.send(clientId,"ACK 5");
         }
@@ -189,15 +206,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     private void PM(String message){
         String userToSend=message.substring(0,message.indexOf(' '));
         String content=message.substring(message.indexOf(' ')+1);
+        String toSend= "NOTIFICATION PM "+userName+" "+content ;
         if(!login ||!database.userExist(userToSend))
             connections.send(clientId,"ERROR 5");
+        else if(database.isLoggedIn(userToSend))
+                connections.send(database.getUserConnectionId(userToSend),toSend);
         else {
-            String toSend= "NOTIFICATION PM "+userName+" "+content ;
-            connections.send(database.getUserConnectionId(userToSend),toSend);
-            database.addPm(userName,message);
-            connections.send(clientId,"ACK 6");
+            database.addNotSeenMessage(userToSend,toSend);
         }
+        database.addPm(userName,message);
+        connections.send(clientId,"ACK 6");
     }
+
 
     private void UserList(){
         if(!login){
@@ -211,12 +231,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         }
     }
 
-    private void StatMessage(String user){
-        if(!login ||!database.userExist(user)){
+    private void StatMessage(){
+        if(!login ||!database.userExist(userName)){
             connections.send(clientId,"ERROR 8");
         }
         else {
-            connections.send(clientId,"ACK 8 "+database.getNumOfPosts(user)+" "+database.getFollowers(user)+" "+database.getNumOfFollowers(user));
+            connections.send(clientId,"ACK 8 "+database.getNumOfPosts(userName)+" "+database.getNumOfFollowing(userName)+" "+database.getNumOfFollowers(userName));
         }
     }
 

@@ -41,29 +41,36 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
             String secondOpString=line.substring(0,line.indexOf(' '));
             String noSecondOp = line.substring(line.indexOf(' ') + 1);
             short secondOp=addReturnShortBytesToList(byteList,secondOpString,false);
-            String allTheRest=noSecondOp.substring(noSecondOp.indexOf(' ') + 1);
+            if(noSecondOp.contains(" ")) {
             short thirdOp=addReturnShortBytesToList(byteList,noSecondOp.substring(0, noSecondOp.indexOf(' ')),false);
-            switch (secondOp){
-                case 4:
-                case 7:
-                    String[] users = allTheRest.split("\\s+");
-                    for(int i=0;i<thirdOp;i++)
-                        addBytesToList(byteList,(users[i]+'\0').getBytes());
-                    return ByteListTobyteArray(byteList);
-                case 8:
-                    String[] forthAndFifth = allTheRest.split("\\s+");
-                    addReturnShortBytesToList(byteList,forthAndFifth[0],false);
-                    addReturnShortBytesToList(byteList,forthAndFifth[1],false);
-                    return ByteListTobyteArray(byteList);
+            String allTheRest=noSecondOp.substring(noSecondOp.indexOf(' ') + 1);
+                switch (secondOp) {
+                    case 4:
+                    case 7:
+                        String[] users = allTheRest.split("\\s+");
+                        for (int i = 0; i < thirdOp; i++)
+                            addBytesToList(byteList, (users[i] + '\0').getBytes());
+                        return ByteListTobyteArray(byteList);
+                    case 8:
+                        String[] forthAndFifth = allTheRest.split("\\s+");
+                        addReturnShortBytesToList(byteList, forthAndFifth[0], false);
+                        addReturnShortBytesToList(byteList, forthAndFifth[1], false);
+                        return ByteListTobyteArray(byteList);
+
+                }
             }
+            else
+                return ByteListTobyteArray(byteList);
         }
         addReturnShortBytesToList(byteList,line,false);
         return ByteListTobyteArray(byteList);
     }
 
     private byte[] setNotificationFrame(List<Byte> byteList,String line){
-        char notificationType=line.charAt(0);
-        byteList.add((byte)notificationType);
+        if(line.substring(0,line.indexOf(' ')).equals("PM"))
+            byteList.add((byte)0);
+        else
+            byteList.add((byte)1);
         String PostingUserAndContent=line.substring(line.indexOf(' ')+1);
         String PostingUser=PostingUserAndContent.substring(0,PostingUserAndContent.indexOf(' '))+"\0";
         String Content=PostingUserAndContent.substring(PostingUserAndContent.indexOf(' '))+"\0";
@@ -311,5 +318,6 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
         opcode=0;
         opIndex=0;
         zeroByteCount=0;
+        userIndex=0;
     }
 }
