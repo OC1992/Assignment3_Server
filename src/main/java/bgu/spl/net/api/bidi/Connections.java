@@ -8,7 +8,7 @@ public interface Connections<T> {
     public void add(ConnectionHandler<T> handler);
 
     boolean send(int connectionId, T msg);
-    public ConnectionHandler<T> get(int connectionId);
+    public ConnectionHandler<T> getHandler(int connectionId);
 
     void broadcast(T msg);
 

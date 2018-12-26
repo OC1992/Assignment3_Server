@@ -27,7 +27,7 @@ public class ConnectionsImpl<T> implements Connections<T>{
         clientHandler.send(msg);
         return true;
     }
-    public ConnectionHandler<T> get(int connectionId) {
+    public ConnectionHandler<T> getHandler(int connectionId) {
         if(connections.containsKey(connectionId)) {
             return connections.get(connectionId);
         }

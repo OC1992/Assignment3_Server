@@ -19,7 +19,7 @@ public abstract class BaseServer<T> implements Server<T> {
     private ServerSocket sock;
 
 
-    public BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
+    private BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encoderDecoderFactory;
@@ -43,7 +43,6 @@ public abstract class BaseServer<T> implements Server<T> {
                         encdecFactory.get(),
                          protocol);
                 ////////////////////////////////////////////////////
-     //           ConnectionsImpl.add(handler);
                 connections.add(handler);
                 protocol.start(connections.clientCount,connections);
                 execute(handler);
