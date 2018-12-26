@@ -1,7 +1,9 @@
 package bgu.spl.net.api.bidi;
 
 import bgu.spl.net.srv.BlockingConnectionHandler;
+import jdk.internal.net.http.common.Pair;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<String>
@@ -10,7 +12,8 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
     private boolean TPC=false;
     private int myName;
     private Connections<String> connections;
-    private LinkedList<String> listOfUsers=new LinkedList<String>();
+    private LinkedList<Pair<String,String>> listOfUsers= new LinkedList<Pair<String,String>>();
+    private HashMap <Pair<String,String>,Boolean> isLogged;
 
 
     @Override
@@ -34,16 +37,26 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
         assert message != null;
         String op = message.substring(0, ind);
         String res=message.substring(ind);
+        int ind2 = -1;
+        ind2=res.indexOf(' ');
         switch (op) {
             case "REGISTER":
-                int ind2 = -1;
-                ind2=res.indexOf(' ');
-                if (!listOfUsers.contains(res.substring(ind,ind2)))
-                    connections.send(myName,"ERROR");
-                else listOfUsers.add(res.substring(ind,ind2));
+                for (Pair<String, String> p:listOfUsers)
+                    if (!p.first.equals(res.substring(ind, ind2)))
+                        connections.send(myName,"ERROR");
+                else {
+                    Pair<String, String> p=new Pair<>(res.substring(ind,ind2),res.substring(ind2));
+                    listOfUsers.add(p);
+                    connections.send(myName,"ACK");
+                }
 
             case "LOGIN":
-
+                for (Pair<String, String> p:listOfUsers) {
+                    if (!p.first.equals(res.substring(ind, ind2)) | !p.second.equals(res.substring(ind2)))
+                        connections.send(myName, "ERROR");
+                    else isLogged.put(p, true);
+                }
+                }
             case "LOGOUT":
 
             case "FOLLOW":
