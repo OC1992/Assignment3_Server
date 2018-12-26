@@ -45,8 +45,8 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                     if (!p.first.equals(res.substring(ind, ind2)))
                         connections.send(myName,"ERROR");
                 else {
-                    Pair<String, String> p=new Pair<>(res.substring(ind,ind2),res.substring(ind2));
-                    listOfUsers.add(p);
+                    Pair<String, String> pair=new Pair<>(res.substring(ind,ind2),res.substring(ind2));
+                    listOfUsers.add(pair);
                     connections.send(myName,"ACK");
                 }
 
@@ -56,10 +56,15 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                         connections.send(myName, "ERROR");
                     else isLogged.put(p, true);
                 }
-                }
-            case "LOGOUT":
 
-            case "FOLLOW":
+            case "LOGOUT":
+                Pair<String, String> pair=new Pair<String, String>(res.substring(ind ,ind2),res.substring(ind2));
+                if (isLogged.isEmpty())
+                    connections.send(myName,"ERROR");
+                else if (listOfUsers.contains(pair))
+                    isLogged.put(pair,false);
+
+        case "FOLLOW":
 
             case "POST":
 
