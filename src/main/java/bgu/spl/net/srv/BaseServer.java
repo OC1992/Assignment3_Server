@@ -48,7 +48,7 @@ public abstract class BaseServer<T> implements Server<T> {
                 protocol.start(connections.clientCount,connections);
                 execute(handler);
             }
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
         }
 
         System.out.println("server closed!!!");

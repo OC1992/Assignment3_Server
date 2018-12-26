@@ -24,7 +24,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     private final SocketChannel chan;
     private final Reactor reactor;
 
-    public NonBlockingConnectionHandler(
+    NonBlockingConnectionHandler(
             BGSMessageEncoderDecoder<T> reader,
             BidiMessagingProtocol<T> protocol,
             SocketChannel chan,
@@ -35,7 +35,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         this.reactor = reactor;
     }
 
-    public Runnable continueRead() {
+    Runnable continueRead() {
         ByteBuffer buf = leaseBuffer();
 
         boolean success = false;
@@ -52,12 +52,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
                     while (buf.hasRemaining()) {
                         String nextMessage = encdec.decodeNextByte(buf.get());
                         if (nextMessage != null) {
-                            T response = null;
                             protocol.process(nextMessage);
-                            if (response != null) {
-                                writeQueue.add(ByteBuffer.wrap(encdec.encode((String) response)));
-                                reactor.updateInterestedOps(chan, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-                            }
                         }
                     }
                 } finally {
@@ -84,7 +79,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         return !chan.isOpen();
     }
 
-    public void continueWrite() {
+    void continueWrite() {
         while (!writeQueue.isEmpty()) {
             try {
                 ByteBuffer top = writeQueue.peek();
@@ -100,10 +95,8 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
             }
         }
 
-        if (writeQueue.isEmpty()) {
-            if (protocol.shouldTerminate()) close();
-            else reactor.updateInterestedOps(chan, SelectionKey.OP_READ);
-        }
+        if (protocol.shouldTerminate()) close();
+        else reactor.updateInterestedOps(chan, SelectionKey.OP_READ);
     }
 
     private static ByteBuffer leaseBuffer() {
