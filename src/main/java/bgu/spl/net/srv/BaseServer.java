@@ -19,7 +19,7 @@ public abstract class BaseServer<T> implements Server<T> {
     private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ConnectionsImpl connections;
-    private int connectionId=0;
+    private int connectionId;
     private ServerSocket sock;
 
 
@@ -32,6 +32,7 @@ public abstract class BaseServer<T> implements Server<T> {
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;
 		this.sock = null;
+		this.connectionId=0;
 
     }
 

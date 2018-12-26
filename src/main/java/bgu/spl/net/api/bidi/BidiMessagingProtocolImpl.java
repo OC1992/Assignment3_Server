@@ -6,24 +6,17 @@ import java.util.Vector;
 
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> {
     private int clientId;
-    private Database database;
-    private boolean login;
-    private boolean terminate;
+    private boolean login=false;
+    private boolean terminate=false;
     private String userName;
     private Connections<String> connections;
-
-
-    public BidiMessagingProtocolImpl(Database database) {
-        this.database = database;
-        this.login = false;
-        this.terminate=false;
-        this.userName = "";
-    }
+    private Database database;
 
     @Override
     public void start(int connectionId, Connections<String> connections) {
         this.connections = connections;
         this.clientId = connectionId;
+        this.database=Database.getInstance();
     }
 
     @Override
@@ -63,7 +56,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 break;
 
             case 8:
-                StatMessage();
+                StatMessage(restOfMessage);
                 break;
         }
     }
@@ -113,12 +106,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
 
     private void Login(String message) {
         String[] userAndPas = message.split("\\s+");
-        if (login | !database.passCheck(userAndPas[0], userAndPas[1]))
+        this.userName = userAndPas[0];
+        if (login | database.isLoggedIn(userName) | !database.passCheck(userAndPas[0], userAndPas[1]))
             connections.send(clientId, "ERROR 2");
         else {
             login = true;
-            this.userName = userAndPas[0];
             database.setConnection(userName,clientId);
+            database.setLoggedIn(userName,true);
             connections.send(clientId, "ACK 2");
             Vector<String> notSeen=database.getNotSeenMessages(userName);
             notSeen.forEach(msg->connections.send(clientId,msg));
@@ -149,9 +143,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             String[] usersToFollowUnfollow = usersOnly.split("\\s+");
             List<String> canFollowUnfollowList = new LinkedList<>();
             for (String user : usersToFollowUnfollow) {
-                if (follow && !database.isFollow(userName, user))
+                if (follow && database.userExist(user) && !database.isFollow(userName, user))
                     canFollowUnfollowList.add(user);
-                if (!follow && database.isFollow(userName, user))
+                if (!follow && database.userExist(user) &&  database.isFollow(userName, user))
                     canFollowUnfollowList.add(user);
             }
             if (canFollowUnfollowList.size() == 0) {
@@ -218,7 +212,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         connections.send(clientId,"ACK 6");
     }
 
-
     private void UserList(){
         if(!login){
             connections.send(clientId,"ERROR 7");
@@ -231,12 +224,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         }
     }
 
-    private void StatMessage(){
-        if(!login ||!database.userExist(userName)){
+    private void StatMessage(String user){
+        if(!login ||!database.userExist(user)){
             connections.send(clientId,"ERROR 8");
         }
         else {
-            connections.send(clientId,"ACK 8 "+database.getNumOfPosts(userName)+" "+database.getNumOfFollowing(userName)+" "+database.getNumOfFollowers(userName));
+            connections.send(clientId,"ACK 8 "+database.getNumOfPosts(user)+" "+database.getNumOfFollowers(user)+" "+database.getNumOfFollowing(user));
         }
     }
 

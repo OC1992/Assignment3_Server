@@ -10,10 +10,10 @@ import bgu.spl.net.srv.Server;
 
 public class ReactorMain {
     public static void main(String[] args){
-        Database database=new Database();
+
         Server.reactor(Runtime.getRuntime().availableProcessors(),
                         7777, //port
-                        () ->  new BidiMessagingProtocolImpl(database), //protocol factory
+                        BidiMessagingProtocolImpl::new, //protocol factory
                         BGSMessageEncoderDecoder::new //message encoder decoder factory
                 ).serve();
     }

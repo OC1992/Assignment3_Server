@@ -1,5 +1,7 @@
 package bgu.spl.net.api.bidi;
 import bgu.spl.net.srv.ConnectionHandler;
+
+import java.io.IOException;
 import java.util.HashMap;
 
 public class ConnectionsImpl<T> implements Connections<T>{
@@ -14,6 +16,7 @@ public class ConnectionsImpl<T> implements Connections<T>{
     public void add(ConnectionHandler<T> handler,int clientCount) {
         connections.put(clientCount,handler);
     }
+
     public void remove(int connectionId) {
         connections.remove(connectionId);
     }
@@ -37,7 +40,11 @@ public class ConnectionsImpl<T> implements Connections<T>{
         if(!connections.containsKey(connectionId))
             return;
         ConnectionHandler<T> clientHandler=connections.get(connectionId);
-        //clientHandler.close(); //send the connection end if exists
-        connections.remove(connectionId);
+        try {
+            clientHandler.close(); //send the connection end if exists
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        remove(connectionId);
     }
 }

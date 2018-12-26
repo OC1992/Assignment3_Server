@@ -12,14 +12,11 @@ import bgu.spl.net.srv.Server;
 public class NewsFeedServerMain {
 
     public static void main(String[] args) {
-        NewsFeed feed = new NewsFeed(); //one shared object
-        Database database=new Database();
-
 
 // you can use any server... 
         Server.threadPerClient(
                 7777, //port
-                () -> new BidiMessagingProtocolImpl(database), //protocol factory
+                BidiMessagingProtocolImpl::new, //protocol factory
                 BGSMessageEncoderDecoder::new //message encoder decoder factory
         ).serve();
 /*
