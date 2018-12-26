@@ -76,11 +76,16 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                     newMessage = newMessage + ' ' + s;
             }
             for (String s:usersToSend)
-                 connections.send(dataSingelton.UsersToSend.get(s),newMessage);
-
+                if (dataSingelton.followList.get(dataSingelton.UsersToSend.get(s)).contains(dataSingelton.listOfUsers.get(myName).first))
+                    connections.send(dataSingelton.UsersToSend.get(s),newMessage);
 
 
             case "PM":
+                if (!dataSingelton.isLogged.containsKey(myName)|!dataSingelton.UsersToSend.containsKey(splitted[0]))
+                    connections.send(myName, "ERROR");
+                else
+                    connections.send(dataSingelton.UsersToSend.get(splitted[0]),splitted[1]);
+
 
             case "USERLIST":
 
