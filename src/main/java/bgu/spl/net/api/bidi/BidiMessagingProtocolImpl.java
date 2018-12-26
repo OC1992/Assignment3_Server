@@ -1,7 +1,8 @@
 package bgu.spl.net.api.bidi;
 
-import bgu.spl.net.srv.BlockingConnectionHandler;
 import jdk.internal.net.http.common.Pair;
+
+import java.util.LinkedList;
 
 public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<String>
 {
@@ -36,6 +37,7 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                 else {
                     Pair<String, String> pair = new Pair<>(splitted[0], splitted[1]);
                     dataSingelton.listOfUsers.put(myName, pair);
+                    dataSingelton.UsersToSend.put(pair.first,myName);
                     connections.send(myName, "ACK");
                 }
 
@@ -46,7 +48,7 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                     connections.send(myName, "ERROR");
                 else dataSingelton.isLogged.put(myName, splitted[0]);
 
-
+//w8 for ack(?)
         case "LOGOUT":
         if (dataSingelton.isLogged.isEmpty())
             connections.send(myName, "ERROR");
@@ -62,6 +64,21 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
 
 
         case "POST":
+            String newMessage=null;
+            LinkedList<String> usersToSend=new LinkedList<>();
+
+            if (!dataSingelton.isLogged.containsKey(myName))
+                connections.send(myName, "ERROR");
+            else for (String s:splitted) {
+                if (s.indexOf(0) == '@')
+                    usersToSend.add(s);
+                else
+                    newMessage = newMessage + ' ' + s;
+            }
+            for (String s:usersToSend)
+                 connections.send(dataSingelton.UsersToSend.get(s),newMessage);
+
+
 
             case "PM":
 

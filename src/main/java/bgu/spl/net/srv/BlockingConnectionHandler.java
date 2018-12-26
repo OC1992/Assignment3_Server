@@ -37,7 +37,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                     System.out.println(nextMessage);
                     out.write(test.encode("ACK 4 3 tomer ofir tomer 0"));
                     out.flush();
-                    protocol.process(nextMessage);
+                    protocol.process((String) nextMessage);
                 }
             }
 
