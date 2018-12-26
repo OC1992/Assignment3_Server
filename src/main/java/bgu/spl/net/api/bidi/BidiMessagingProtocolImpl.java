@@ -3,16 +3,13 @@ package bgu.spl.net.api.bidi;
 import bgu.spl.net.srv.BlockingConnectionHandler;
 import jdk.internal.net.http.common.Pair;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-
 public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<String>
 {
     private boolean shouldTerminate = false;
     private boolean TPC=false;
     private int myName;
     private Connections<String> connections;
-    private DataSingelton dataSingelton=null;
+    private DataSingelton dataSingelton;
     @Override
     //how should i use the getclass func? general question
 
@@ -22,7 +19,7 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
            TPC=true;
        this.connections=connections;
        myName=connectionId;
-        dataSingelton=DataSingelton.getInstance();
+       dataSingelton=DataSingelton.getInstance();
     }
 //message arrives and sent by the send func
     @Override
@@ -37,28 +34,28 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
         ind2=res.indexOf(' ');
         switch (op) {
             case "REGISTER":
-                for (Pair<String, String> p:listOfUsers)
+                for (Pair<String, String> p:dataSingelton.listOfUsers)
                     if (!p.first.equals(res.substring(ind, ind2)))
                         connections.send(myName,"ERROR");
                 else {
                     Pair<String, String> pair=new Pair<>(res.substring(ind,ind2),res.substring(ind2));
-                    listOfUsers.add(pair);
+                        dataSingelton.listOfUsers.add(pair);
                     connections.send(myName,"ACK");
                 }
 
             case "LOGIN":
-                for (Pair<String, String> p:listOfUsers) {
+                for (Pair<String, String> p:dataSingelton.listOfUsers) {
                     if (!p.first.equals(res.substring(ind, ind2)) | !p.second.equals(res.substring(ind2)))
                         connections.send(myName, "ERROR");
-                    else isLogged.put(p, true);
+                    else dataSingelton.isLogged.put(p, true);
                 }
 
             case "LOGOUT":
                 Pair<String, String> pair=new Pair<String, String>(res.substring(ind ,ind2),res.substring(ind2));
-                if (isLogged.isEmpty())
+                if (dataSingelton.isLogged.isEmpty())
                     connections.send(myName,"ERROR");
-                else if (listOfUsers.contains(pair))
-                    isLogged.put(pair,false);
+                else if (dataSingelton.listOfUsers.contains(pair))
+                    dataSingelton.isLogged.put(pair,false);
 
         case "FOLLOW":
 

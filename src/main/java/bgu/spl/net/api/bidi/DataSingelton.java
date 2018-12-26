@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class DataSingelton {
-    private LinkedList<Pair<String,String>> listOfUsers;
-    private HashMap<Pair<String,String>,Boolean> isLogged;
-    private HashMap <Pair<String,String>,String> followList;
+    public LinkedList<Pair<String,String>> listOfUsers;
+    public HashMap<Pair<String,String>,Boolean> isLogged;
+    public HashMap <Pair<String,String>,String> followList;
     private static final Object lockDataSingelton = new Object();
     private static volatile DataSingelton instance = null;
 

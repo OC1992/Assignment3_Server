@@ -24,9 +24,9 @@ public interface Server<T> extends Closeable {
     public static <T> BaseServer<T> threadPerClient(
             int port,
             Supplier<BidiMessagingProtocol<T>> protocolFactory,
-            Supplier<BGSMessageEncoderDecoder<T>> encoderDecoderFactory) {
+            Supplier<BGSMessageEncoderDecoder> encoderDecoderFactory) {
 
-        return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
+        return new BaseServer<T>(port, protocolFactory,encoderDecoderFactory) {
             @Override
             protected void execute(BlockingConnectionHandler<T>  handler) {
                 new Thread(handler).start();

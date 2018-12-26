@@ -6,7 +6,7 @@ public interface BidiMessagingProtocol<T>  {
 	**/
     void start(int connectionId, Connections<String> connections);
     
-    void process(T message);
+    void process(String message);
 	
 	/**
      * @return true if the connection should be terminated

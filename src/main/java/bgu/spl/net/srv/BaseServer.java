@@ -2,6 +2,7 @@ package bgu.spl.net.srv;
 
 
 import bgu.spl.net.api.MessageEncoderDecoder;
+import bgu.spl.net.api.bidi.BGSMessageEncoderDecoder;
 import bgu.spl.net.api.bidi.BidiMessagingProtocol;
 import bgu.spl.net.api.bidi.BidiMessagingProtocolImpl;
 import bgu.spl.net.api.bidi.ConnectionsImpl;
@@ -15,11 +16,11 @@ public abstract class BaseServer<T> implements Server<T> {
 
     private final int port;
     private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
-    private final Supplier<MessageEncoderDecoder> encdecFactory;
+    private final Supplier<BGSMessageEncoderDecoder> encdecFactory;
     private ServerSocket sock;
 
 
-        private BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder> encoderDecoderFactory) {
+        public BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<BGSMessageEncoderDecoder> encoderDecoderFactory) {
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encoderDecoderFactory;
@@ -64,7 +65,7 @@ public abstract class BaseServer<T> implements Server<T> {
     public static <T> BaseServer<T> threadPerClient(
             int port,
             Supplier<BidiMessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder> encoderDecoderFactory) {
+            Supplier<BGSMessageEncoderDecoder> encoderDecoderFactory) {
 
         return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
 
