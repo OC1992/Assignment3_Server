@@ -8,6 +8,7 @@ import java.util.List;
 
 class DataSingelton {
     HashMap<Integer,Pair<String,String>> listOfUsers;
+    int numOfUsers;
     HashMap<String,Integer> UsersToSend;
     HashMap<Integer,String> isLogged;
     HashMap <Integer, List<String>> followList;
@@ -15,6 +16,7 @@ class DataSingelton {
     private static volatile DataSingelton instance = null;
 
     private DataSingelton (){
+        numOfUsers=0;
        this.listOfUsers= new HashMap<>();
         this.isLogged=new HashMap<>();
         this.followList=new HashMap<>();

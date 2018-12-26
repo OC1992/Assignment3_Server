@@ -38,6 +38,7 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                     Pair<String, String> pair = new Pair<>(splitted[0], splitted[1]);
                     dataSingelton.listOfUsers.put(myName, pair);
                     dataSingelton.UsersToSend.put(pair.first,myName);
+                    dataSingelton.numOfUsers++;
                     connections.send(myName, "ACK");
                 }
 
@@ -88,6 +89,14 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
 
 
             case "USERLIST":
+                String userList=null;
+                if (!dataSingelton.isLogged.containsKey(myName))
+                    connections.send(myName, "ERROR");
+                for (int i=0;i<dataSingelton.numOfUsers;i++) {
+                    userList = userList +dataSingelton.listOfUsers.get(i).first+' ';
+                    connections.send(myName, userList);
+                }
+
 
             case "STAT":
 
