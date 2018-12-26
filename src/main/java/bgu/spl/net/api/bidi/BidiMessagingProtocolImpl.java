@@ -26,44 +26,42 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
             ind = message.indexOf(' ');
         assert message != null;
         String op = message.substring(0, ind);
-        String res=message.substring(ind+1);
+        String res = message.substring(ind + 1);
+        String[] splitted = res.split("\\s+");
 
         switch (op) {
             case "REGISTER":
-                String[]splitted=res.split("\\s+");
-
-                for (Pair<String, String> p:dataSingelton.listOfUsers)
-                    if (!p.first.equals((splitted[0])))
-                        connections.send(myName,"ERROR");
+                if (!dataSingelton.listOfUsers.get(myName).first.equals(splitted[0]))
+                    connections.send(myName, "ERROR");
                 else {
-                    Pair<String, String> pair=new Pair<>(splitted[0],splitted[1]);
-                        dataSingelton.listOfUsers.add(pair);
-                    connections.send(myName,"ACK");
+                    Pair<String, String> pair = new Pair<>(splitted[0], splitted[1]);
+                    dataSingelton.listOfUsers.put(myName, pair);
+                    connections.send(myName, "ACK");
                 }
 
             case "LOGIN":
-                for (Pair<String, String> p:dataSingelton.listOfUsers) {
-                    if (!p.first.equals(splitted[0]) | !p.second.equals(splitted[1]))
-                        connections.send(myName, "ERROR");
-                    else dataSingelton.isLogged.put(p, true);
-                }
 
-            case "LOGOUT":
-                Pair<String, String> pair= new Pair<>(splitted[0], splitted[1]);
-                if (dataSingelton.isLogged.isEmpty())
-                    connections.send(myName,"ERROR");
-                else if (dataSingelton.listOfUsers.contains(pair))
-                    dataSingelton.isLogged.put(pair,false);
+                if (!dataSingelton.listOfUsers.containsKey(myName)
+                        | !dataSingelton.listOfUsers.get(myName).second.equals(splitted[1]))
+                    connections.send(myName, "ERROR");
+                else dataSingelton.isLogged.put(myName, splitted[0]);
+
+
+        case "LOGOUT":
+        if (dataSingelton.isLogged.isEmpty())
+            connections.send(myName, "ERROR");
+
+        if (dataSingelton.listOfUsers.containsKey(myName))
+            dataSingelton.listOfUsers.remove(myName);
 
         case "FOLLOW":
-            String[]splitted=res.split("\\s+");
-            dataSingelton.followList.remove()
+        if (splitted[0].equals('0'))
+            for (String s : splitted) dataSingelton.followList.get(myName).remove(s);
+        else
+            for (String s : splitted) dataSingelton.followList.get(myName).add(s);
 
-                else
 
-
-
-            case "POST":
+        case "POST":
 
             case "PM":
 

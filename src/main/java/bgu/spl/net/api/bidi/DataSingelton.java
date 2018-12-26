@@ -4,20 +4,21 @@ import jdk.internal.net.http.common.Pair;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
-public class DataSingelton {
-    public LinkedList<Pair<String,String>> listOfUsers;
-    public HashMap<Pair<String,String>,Boolean> isLogged;
-    public HashMap <Pair<String,String>,String> followList;
+class DataSingelton {
+    HashMap<Integer,Pair<String,String>> listOfUsers;
+    HashMap<Integer,String> isLogged;
+    HashMap <Integer, List<String>> followList;
     private static final Object lockDataSingelton = new Object();
     private static volatile DataSingelton instance = null;
 
     private DataSingelton (){
-       this.listOfUsers= new LinkedList<Pair<String,String>>();
+       this.listOfUsers= new HashMap<>();
         this.isLogged=new HashMap<>();
         this.followList=new HashMap<>();
     }
-    public static DataSingelton getInstance() {
+    static DataSingelton getInstance() {
         DataSingelton result = instance;
         if (result == null) {
             synchronized (lockDataSingelton) {
