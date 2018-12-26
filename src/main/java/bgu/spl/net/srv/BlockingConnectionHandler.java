@@ -1,7 +1,6 @@
 package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.api.bidi.BGSMessageEncoderDecoder;
 import bgu.spl.net.api.bidi.BidiMessagingProtocol;
 
@@ -27,7 +26,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void run() {
-        BGSMessageEncoderDecoder test=new BGSMessageEncoderDecoder();
+        BGSMessageEncoderDecoder<T> test=new BGSMessageEncoderDecoder<T>();
         try (Socket sock = this.sock) { //just for automatic closing
             int read;
             in = new BufferedInputStream(sock.getInputStream());

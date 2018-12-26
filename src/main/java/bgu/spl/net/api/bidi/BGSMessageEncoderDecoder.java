@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
+public class BGSMessageEncoderDecoder<T> implements MessageEncoderDecoder<String> {
     private byte [] decOpArr=new byte[2];
     private byte [] usArr=new byte[2];
     private int opIndex=0;

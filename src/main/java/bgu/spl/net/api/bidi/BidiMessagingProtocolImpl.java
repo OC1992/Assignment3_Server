@@ -12,10 +12,7 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
     private boolean TPC=false;
     private int myName;
     private Connections<String> connections;
-    private LinkedList<Pair<String,String>> listOfUsers= new LinkedList<Pair<String,String>>();
-    private HashMap <Pair<String,String>,Boolean> isLogged;
-
-
+    private DataSingelton dataSingelton=null;
     @Override
     //how should i use the getclass func? general question
 
@@ -25,8 +22,7 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
            TPC=true;
        this.connections=connections;
        myName=connectionId;
-
-
+        dataSingelton=DataSingelton.getInstance();
     }
 //message arrives and sent by the send func
     @Override
@@ -65,6 +61,8 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                     isLogged.put(pair,false);
 
         case "FOLLOW":
+
+
 
             case "POST":
 

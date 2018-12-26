@@ -1,7 +1,6 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.bidi.BGSMessageEncoderDecoder;
 import bgu.spl.net.api.bidi.BidiMessagingProtocol;
 
 import java.io.Closeable;
@@ -16,16 +15,16 @@ public interface Server<T> extends Closeable {
 
     /**
      *This function returns a new instance of a thread per client pattern server
+     * @param <T> The Message Object for the protocol
      * @param port The port for the server socket
      * @param protocolFactory A factory that creats new MessagingProtocols
      * @param encoderDecoderFactory A factory that creats new MessageEncoderDecoder
-     * @param <T> The Message Object for the protocol
      * @return A new Thread per client server
      */
-    public static <T> Server<T>  threadPerClient(
+    public static <T> BaseServer<T> threadPerClient(
             int port,
             Supplier<BidiMessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T> > encoderDecoderFactory) {
+            Supplier<BGSMessageEncoderDecoder<T>> encoderDecoderFactory) {
 
         return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
             @Override
@@ -49,8 +48,8 @@ public interface Server<T> extends Closeable {
     public static <T> Server<T> reactor(
             int nthreads,
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
+            Supplier<BidiMessagingProtocol<T>> protocolFactory,
+            Supplier<BGSMessageEncoderDecoder<T>> encoderDecoderFactory) {
         return new Reactor<T>(nthreads, port, protocolFactory, encoderDecoderFactory);
     }
 

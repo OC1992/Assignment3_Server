@@ -19,7 +19,7 @@ public abstract class BaseServer<T> implements Server<T> {
     private ServerSocket sock;
 
 
-    private BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder> encoderDecoderFactory) {
+        private BaseServer(int port, Supplier<BidiMessagingProtocol<T>> protocolFactory, Supplier<MessageEncoderDecoder> encoderDecoderFactory) {
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encoderDecoderFactory;
