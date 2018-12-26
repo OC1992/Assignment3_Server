@@ -3,17 +3,26 @@ package bgu.spl.net.api.bidi;
 import bgu.spl.net.srv.BlockingConnectionHandler;
 import bgu.spl.net.srv.ConnectionHandler;
 
+import java.io.IOException;
+
 public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<T>
 {
     private boolean shouldTerminate = false;
-    ConnectionHandler<T> handler=new BlockingConnectionHandler<>();
+    private boolean TPC=false;
+    private int myName;
+
 
     @Override
+    //how should i use the getclass func?
+    //its a constractor, we take the relevant handler and make a procces on it
     public void start(int connectionId, Connections<T> connections) {
-        handler
+       if (connections.get(connectionId) instanceof BlockingConnectionHandler)
+           TPC=true;
+       myName=connectionId;
+
 
     }
-
+//message arrives and sent by the send func
     @Override
     public void process(T message) {
 
