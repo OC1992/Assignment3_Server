@@ -58,35 +58,50 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
             dataSingelton.listOfUsers.remove(myName);
 
         case "FOLLOW":
-        if (splitted[0].equals('0'))
-            for (String s : splitted) dataSingelton.followList.get(myName).remove(s);
-        else
-            for (String s : splitted) dataSingelton.followList.get(myName).add(s);
-
+        if (splitted[0].equals('0')) {
+            for (String s : splitted){
+                dataSingelton.followList.get(myName).remove(s);
+                dataSingelton.myData.get(myName)[1]--;
+                dataSingelton.myData.get(dataSingelton.UsersToSend.get(s))[1]--;
+            }
+        }
+        else {
+            for (String s : splitted) {
+                dataSingelton.followList.get(myName).add(s);
+                dataSingelton.myData.get(myName)[1]++;
+                dataSingelton.myData.get(dataSingelton.UsersToSend.get(s))[1]++;
+            }
+        }
 
         case "POST":
             String newMessage=null;
             LinkedList<String> usersToSend=new LinkedList<>();
-
-            if (!dataSingelton.isLogged.containsKey(myName))
+            boolean flag=false;
+            if (!dataSingelton.isLogged.containsKey(myName)) {
                 connections.send(myName, "ERROR");
-            else for (String s:splitted) {
+            }
+            else
+                flag=true;
+                for (String s:splitted) {
                 if (s.indexOf(0) == '@')
                     usersToSend.add(s);
                 else
                     newMessage = newMessage + ' ' + s;
             }
-            for (String s:usersToSend)
-                if (dataSingelton.followList.get(dataSingelton.UsersToSend.get(s)).contains(dataSingelton.listOfUsers.get(myName).first))
-                    connections.send(dataSingelton.UsersToSend.get(s),newMessage);
-
+            if (flag) {
+                dataSingelton.myData.get(myName)[0]++;
+                for (String s : usersToSend)
+                    if (dataSingelton.followList.get(dataSingelton.UsersToSend.get(s)).contains(dataSingelton.listOfUsers.get(myName).first))
+                        connections.send(dataSingelton.UsersToSend.get(s), newMessage);
+            }
 
             case "PM":
                 if (!dataSingelton.isLogged.containsKey(myName)|!dataSingelton.UsersToSend.containsKey(splitted[0]))
                     connections.send(myName, "ERROR");
-                else
-                    connections.send(dataSingelton.UsersToSend.get(splitted[0]),splitted[1]);
-
+                else {
+                    dataSingelton.myData.get(myName)[0]++;
+                    connections.send(dataSingelton.UsersToSend.get(splitted[0]), splitted[1]);
+                }
 
             case "USERLIST":
                 String userList=null;
@@ -97,8 +112,14 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<Strin
                     connections.send(myName, userList);
                 }
 
-
             case "STAT":
+                String data=null;
+                if (!dataSingelton.isLogged.containsKey(myName)|(!dataSingelton.listOfUsers.containsKey(myName)))
+                    connections.send(myName, "ERROR");
+                else
+                    connections.send(myName, dataSingelton.myData.get(myName)[0]+" "+ dataSingelton.myData.get(myName)[1]);
+
+
 
             case "NOTIFICATION":
 
