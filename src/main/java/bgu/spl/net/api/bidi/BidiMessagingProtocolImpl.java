@@ -175,8 +175,21 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
           String toSend= "NOTIFICATION Public "+userName+" "+message ;
           List<String> tagged=new LinkedList<>();
           String[] splitted= message.split("@");
-          for(int i=1;i<splitted.length;i=i+1)
-              tagged.add(splitted[i].substring(0,splitted[i].indexOf(" ")));
+
+          for(int i=1;i<splitted.length;i=i+1) {
+              String user;
+              if(!splitted[i].contains(" ")) {
+                  user = splitted[i];
+              }
+              else
+                  user=splitted[i].substring(0, splitted[i].indexOf(" "));
+              if (database.userExist(user) && !tagged.contains(user))
+                  tagged.add(user);
+          }
+          if(splitted.length>1 && tagged.size()==0) {
+              connections.send(clientId, "ERROR 5");
+              return;
+          }
           Vector<String> followers=database.getFollowers(userName);
           followers.forEach(s->{
               tagged.remove(s);
@@ -198,11 +211,21 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     }
 
     private void PM(String message){
-        String userToSend=message.substring(0,message.indexOf(' '));
-        String content=message.substring(message.indexOf(' ')+1);
+        String userToSend;
+        String content;
+        if(!message.contains(" ")) {
+            userToSend = message;
+            content="";
+        }
+        else {
+            userToSend = message.substring(0, message.indexOf(' '));
+            content = message.substring(message.indexOf(' ') + 1);
+        }
         String toSend= "NOTIFICATION PM "+userName+" "+content ;
-        if(!login ||!database.userExist(userToSend))
-            connections.send(clientId,"ERROR 5");
+        if(!login ||!database.userExist(userToSend)) {
+            connections.send(clientId, "ERROR 6");
+            return;
+        }
         else if(database.isLoggedIn(userToSend))
                 connections.send(database.getUserConnectionId(userToSend),toSend);
         else {
@@ -232,7 +255,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             connections.send(clientId,"ACK 8 "+database.getNumOfPosts(user)+" "+database.getNumOfFollowers(user)+" "+database.getNumOfFollowing(user));
         }
     }
-
 
     private void appendUsers(List<String> users,StringBuilder s){
         for (String user : users)
