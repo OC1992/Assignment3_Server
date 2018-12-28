@@ -1,8 +1,6 @@
 package bgu.spl.net.impl.BGSServer;
 
-import bgu.spl.net.api.bidi.BGSMessageEncoderDecoder;
-import bgu.spl.net.api.bidi.BidiMessagingProtocolImpl;
-import bgu.spl.net.api.bidi.Database;
+import bgu.spl.net.api.bidi.*;
 import bgu.spl.net.impl.newsfeed.NewsFeed;
 import bgu.spl.net.impl.rci.ObjectEncoderDecoder;
 import bgu.spl.net.impl.rci.RemoteCommandInvocationProtocol;
@@ -14,6 +12,7 @@ public class TPCMain {
               7777, //port
                 BidiMessagingProtocolImpl::new, //protocol factory
                BGSMessageEncoderDecoder::new //message encoder decoder factory
+
        ).serve();
 
     }

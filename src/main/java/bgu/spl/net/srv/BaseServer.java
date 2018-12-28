@@ -18,7 +18,7 @@ public abstract class BaseServer<T> implements Server<T> {
     private final int port;
     private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
-    private ConnectionsImpl connections;
+    private final ConnectionsImpl<T> connections;
     private int connectionId;
     private ServerSocket sock;
 
@@ -27,7 +27,7 @@ public abstract class BaseServer<T> implements Server<T> {
             int port,
             Supplier<BidiMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> encdecFactory) {
-        this.connections=new ConnectionsImpl();
+        this.connections=new ConnectionsImpl<>();
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;
