@@ -12,8 +12,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     private Connections<String> connections;
     private Database database;
 
+
+    public BidiMessagingProtocolImpl(Database database){
+        this.database=database;
+    }
     /**
-     * initiate the Singleton database if not already got initiate by other protocol
+     * initiate the database if not already got initiate by other protocol
      * @param connectionId set up client connection id
      * @param connections set up connection class member
      */
@@ -21,7 +25,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     public void start(int connectionId, Connections<String> connections) {
         this.connections = connections;
         this.clientId = connectionId;
-        this.database=Database.getInstance();
+
     }
 
     /**

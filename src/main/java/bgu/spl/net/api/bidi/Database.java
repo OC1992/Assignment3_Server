@@ -7,33 +7,19 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- *  Singleton class that holds all the data of the server: users, passwords, posts, pm
+ *  class that holds all the data of the server: users, passwords, posts, pm
  *  and the specific connectionId when user log in.
  *  in general all the methods protected with read/write pattern. hash maps who can be access from couple
  *  of threads are concurrent- meaning thread safe.
  */
 public class Database {
-    private static volatile Database instance = null;
-    private static final Object lockData = new Object();
+
     private ReadWriteLock rwl; //ReaderWriter pattern
     private ConcurrentHashMap<String,BGUser> nameToBGUser;
 
 
-    //A Thread safe constructor
-    public static Database getInstance() {
-        Database result = instance;
-        if (result == null) {
-            synchronized (lockData) {
-                result = instance;
-                if (result == null)
-                    instance = result = new Database();
-            }
-        }
-        return result;
-    }
-
-    //Private Constructor (will only run one time)
-    private Database(){
+    // Constructor (will only run one time)
+    public Database(){
         rwl =new ReentrantReadWriteLock(true);
         nameToBGUser=new ConcurrentHashMap<>();
     }
@@ -289,7 +275,7 @@ public class Database {
     }
 
     /**
-     * @param user
+     * @param user user
      * @return all not seen messages of the user
      */
     public Vector<String> getNotSeenMessages(String user){
