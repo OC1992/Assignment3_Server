@@ -10,8 +10,8 @@ public class ReactorMain {
     public static void main(String[] args){
 
 
-        Server.reactor(Runtime.getRuntime().availableProcessors(),
-                        7777, //port
+        Server.reactor(Integer.parseInt(args[1]),
+                        Integer.parseInt(args[0]), //port
                         BidiMessagingProtocolImpl::new, //protocol factory
                         BGSMessageEncoderDecoder::new //message encoder decoder factory
                 ).serve();
