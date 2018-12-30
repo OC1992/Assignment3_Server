@@ -45,6 +45,7 @@ public class Reactor<T> implements Server<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void serve() {
 	selectorThread = Thread.currentThread();
         try (Selector selector = Selector.open();
@@ -68,7 +69,7 @@ public class Reactor<T> implements Server<T> {
                         continue;
                     } else if (key.isAcceptable()) {
                         handleAccept(serverSock, selector);
-                    } else {
+                    } else if(!((NonBlockingConnectionHandler<T>)key.attachment()).isClosed()) {
                         handleReadWrite(key);
                     }
                 }
