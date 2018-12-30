@@ -151,10 +151,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             String[] usersToFollowUnfollow = usersOnly.split("\\s+");
             List<String> canFollowUnfollowList = new LinkedList<>();
             for (String user : usersToFollowUnfollow) {
-                if (follow && !database.isFollow(userName, user))
-                    canFollowUnfollowList.add(user);
-                if (!follow && database.isFollow(userName, user))
-                    canFollowUnfollowList.add(user);
+                if(!user.equals(userName)) {
+                    if (follow && !database.isFollow(userName, user))
+                        canFollowUnfollowList.add(user);
+                    if (!follow && database.isFollow(userName, user))
+                        canFollowUnfollowList.add(user);
+                }
             }
             if (canFollowUnfollowList.size() == 0) {
                 connections.send(clientId, "ERROR 4");
