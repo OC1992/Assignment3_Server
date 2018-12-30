@@ -13,13 +13,27 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *  of threads are concurrent- meaning thread safe.
  */
 public class Database {
-
+    private static volatile Database instance = null;
+    private static final Object lockDatabase = new Object();
     private ReadWriteLock rwl; //ReaderWriter pattern
     private ConcurrentHashMap<String,BGUser> nameToBGUser;
 
 
+    //A Thread safe constructor
+    public static Database getInstance() {
+        Database result = instance;
+        if (result == null) {
+            synchronized (lockDatabase) {
+                result = instance;
+                if (result == null)
+                    instance = result = new Database();
+            }
+        }
+        return result;
+    }
+
     // Constructor (will only run one time)
-    public Database(){
+    private Database(){
         rwl =new ReentrantReadWriteLock(true);
         nameToBGUser=new ConcurrentHashMap<>();
     }
