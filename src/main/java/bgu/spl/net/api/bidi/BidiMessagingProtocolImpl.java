@@ -1,5 +1,4 @@
 package bgu.spl.net.api.bidi;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -10,7 +9,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     private boolean terminate=false;
     private String userName;
     private Connections<String> connections;
-    private Database database;
+    private final Database database;
 
 
     public BidiMessagingProtocolImpl(Database database){
