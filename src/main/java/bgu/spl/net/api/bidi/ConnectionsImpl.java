@@ -1,15 +1,14 @@
 package bgu.spl.net.api.bidi;
 import bgu.spl.net.srv.ConnectionHandler;
-
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionsImpl<T> implements Connections<T>{
 
-    private HashMap<Integer,ConnectionHandler<T>>  connections;
+    private ConcurrentHashMap<Integer,ConnectionHandler<T>> connections;
 
     public ConnectionsImpl(){
-        this.connections=new HashMap<>();
+        this.connections=new ConcurrentHashMap<>();
     }
 
 
