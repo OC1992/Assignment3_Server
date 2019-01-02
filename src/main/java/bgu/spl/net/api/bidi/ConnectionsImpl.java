@@ -21,7 +21,7 @@ public class ConnectionsImpl<T> implements Connections<T>{
     }
 
     @Override
-    public boolean send(int connectionId, T msg) {
+    public synchronized boolean send(int connectionId, T msg) {
         if(!connections.containsKey(connectionId))
             return false; //connection not found,return false or exception
         ConnectionHandler<T> clientHandler=connections.get(connectionId);
@@ -35,7 +35,7 @@ public class ConnectionsImpl<T> implements Connections<T>{
     }
 
     @Override
-    public void disconnect(int connectionId) {
+    public synchronized void disconnect(int connectionId) {
         if(!connections.containsKey(connectionId))
             return;
         ConnectionHandler<T> clientHandler=connections.get(connectionId);
