@@ -39,11 +39,13 @@ public class ConnectionsImpl<T> implements Connections<T>{
         if(!connections.containsKey(connectionId))
             return;
         ConnectionHandler<T> clientHandler=connections.get(connectionId);
+        /*
         try {
             clientHandler.close(); //send the connection end if exists
         } catch (IOException e) {
             e.printStackTrace();
         }
+        */
         remove(connectionId);
     }
 }

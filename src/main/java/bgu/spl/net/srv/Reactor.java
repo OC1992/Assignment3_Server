@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
 public class Reactor<T> implements Server<T> {
-
     private final int port;
     private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> readerFactory;
@@ -105,13 +104,13 @@ public class Reactor<T> implements Server<T> {
     private void handleAccept(ServerSocketChannel serverChan, Selector selector) throws IOException {
         SocketChannel clientChan = serverChan.accept();
         clientChan.configureBlocking(false);
-        BidiMessagingProtocol protocol=protocolFactory.get();
-        protocol.start(connectionId,connections);
         final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<>(
                 readerFactory.get(),
-                protocol,
+                protocolFactory.get(),
                 clientChan,
-                this);
+                this,
+                connectionId,
+                connections);
         connections.add(handler,connectionId++);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }

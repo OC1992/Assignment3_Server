@@ -150,7 +150,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             String[] usersToFollowUnfollow = usersOnly.split("\\s+");
             List<String> canFollowUnfollowList = new LinkedList<>();
             for (String user : usersToFollowUnfollow) {
-                if(!user.equals(userName)) {
+                if(!user.equals(userName) && database.userExist(user)) {
                     if (follow && !database.isFollow(userName, user))
                         canFollowUnfollowList.add(user);
                     if (!follow && database.isFollow(userName, user))
@@ -205,14 +205,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
           Vector<String> followers=database.getFollowers(userName);
           followers.forEach(s->{
               tagged.remove(s);
-              if(database.isLoggedIn(s))
-                  connections.send(database.getUserConnectionId(s),toSend);
+              if(database.isLoggedIn(s)) {
+                  if (!connections.send(database.getUserConnectionId(s), toSend))
+                      database.addNotSeenMessage(s, toSend);
+              }
               else
                   database.addNotSeenMessage(s,toSend);
           });
           tagged.forEach(s->{
-              if (database.isLoggedIn(s))
-                  connections.send(database.getUserConnectionId(s), toSend);
+              if (database.isLoggedIn(s)) {
+                  if (!connections.send(database.getUserConnectionId(s), toSend))
+                      database.addNotSeenMessage(s, toSend);
+              }
               else
                   database.addNotSeenMessage(s, toSend);
           });
@@ -241,8 +245,10 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             connections.send(clientId, "ERROR 6");
             return;
         }
-        else if(database.isLoggedIn(userToSend))
-                connections.send(database.getUserConnectionId(userToSend),toSend);
+        else if(database.isLoggedIn(userToSend)) {
+                if (!connections.send(database.getUserConnectionId(userToSend), toSend))
+                    database.addNotSeenMessage(userToSend, toSend);
+        }
         else {
             database.addNotSeenMessage(userToSend,toSend);
         }
