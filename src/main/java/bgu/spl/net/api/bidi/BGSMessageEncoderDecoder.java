@@ -72,8 +72,8 @@ public class BGSMessageEncoderDecoder implements MessageEncoderDecoder<String> {
         else
             byteList.add((byte) 1);
         String PostingUserAndContent = line.substring(line.indexOf(' ') + 1);
-        String PostingUser = PostingUserAndContent.substring(0, PostingUserAndContent.indexOf(' ')) + "\0";
-        String Content = PostingUserAndContent.substring(PostingUserAndContent.indexOf(' ')) + "\0";
+        String PostingUser = PostingUserAndContent.substring(0, PostingUserAndContent.indexOf(' ')) + '\0';
+        String Content = PostingUserAndContent.substring(PostingUserAndContent.indexOf(' ')+1) +'\0';
         addBytesToList(byteList, PostingUser.getBytes());
         addBytesToList(byteList, Content.getBytes());
         return ByteListTobyteArray(byteList);
